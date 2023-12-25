@@ -1,1 +1,3 @@
 node_modules
+pageviews*.csv
+.DS_Store
