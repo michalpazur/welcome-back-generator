@@ -1,9 +1,6 @@
 def main():
   with open("python/pageviews_en.csv") as views:
     with open("python/pageviews_f.csv", "w") as out:
-      out.write(" ".join(["title", "id", "views"]))
-      out.write("\n")
-
       last_line_title = ""
       last_line_views = 0
       for line in views:
