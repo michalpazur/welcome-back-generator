@@ -34,6 +34,7 @@ const getRandomArticle = async (
     articles = await getRandomArticles();
   }
 
+  articles = articles.filter((a) => !a.title.includes("disambiguation"));
   for (let a in articles) {
     const article = articles[a];
     const viewsResponse = await getViews(article.title);
