@@ -3,3 +3,4 @@ pageviews*.csv
 .DS_Store
 .env
 db
+dist
