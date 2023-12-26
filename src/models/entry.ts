@@ -53,7 +53,7 @@ Entry.init(
       allowNull: true,
     },
     imgUrl: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(2048),
     },
   },
   { sequelize }
