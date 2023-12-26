@@ -132,6 +132,8 @@ const getWikidata = async (req: Request, res: Response) => {
     const newEntry: Partial<EntryAttributes> = { id, name: response.title };
     const imageKey = imageKeys.find((k) => !!wikidata[k]);
     if (!imageKey) continue;
+    const image = (wikidata[imageKey][0].value);
+    if (!image || !image.content) continue;
     const imageName = (wikidata[imageKey][0].value.content as string).replace(
       /\s/g,
       "_"
