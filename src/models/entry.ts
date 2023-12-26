@@ -11,8 +11,8 @@ export interface EntryAttributes {
   name: string;
   startDate: Date;
   startPrecision: number;
-  endDate?: Date;
-  endPrecision?: number;
+  endDate: Date | null;
+  endPrecision: number | null;
   imgUrl: string;
 }
 
@@ -24,8 +24,8 @@ export class Entry
   declare name: string;
   declare startDate: Date;
   declare startPrecision: number;
-  declare endDate?: Date | undefined;
-  declare endPrecision?: number | undefined;
+  declare endDate: Date | null;
+  declare endPrecision: number | null;
   declare imgUrl: string;
 }
 
