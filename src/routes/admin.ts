@@ -160,12 +160,16 @@ const getWikidataForObject = async (
     const url = `${hash.substring(0, 1)}/${hash.substring(
       0,
       2
-    )}/${imageName}/600px-${imageName}.png`;
+    )}/${imageName}/1200px-${imageName}.${
+      imageName.endsWith("png") || imageName.endsWith("svg") ? "png" : "jpg"
+    }`;
     newEntry.imgUrl =
       "https://upload.wikimedia.org/wikipedia/commons/thumb/" + url;
   }
 
-  const startDateKey = Object.keys(wikidata).find((k) => startDateKeys.includes(k));
+  const startDateKey = Object.keys(wikidata).find((k) =>
+    startDateKeys.includes(k)
+  );
   if (!startDateKey) return undefined;
   const startDate = wikidata[startDateKey][0].value.content as WikidataDate;
   if (!startDate?.time) return undefined;
