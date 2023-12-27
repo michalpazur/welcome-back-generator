@@ -3,6 +3,7 @@ import {
   Image,
   createCanvas,
   loadImage,
+  registerFont,
 } from "canvas";
 import crypto from "crypto";
 import { add, format } from "date-fns";
@@ -15,6 +16,11 @@ import { File } from "../models/file";
 import { E, MessageResponse } from "../types";
 import { userAgent } from "../util/axios";
 import { sequelize } from "../util/sequelize";
+
+registerFont(path.join("src", "assets", "font", "NotoSans.ttf"), {
+  family: "Noto",
+  weight: "bold",
+});
 
 type DateQuery = "sameYear" | "sameYearAfter" | "after" | "maxYearAfter";
 type GenerateQuery = { method: DateQuery };
@@ -189,7 +195,7 @@ const generate = async (
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "#757575";
   ctx.fillRect(0, 0, width, height);
-  ctx.font = "bold 72px Arial";
+  ctx.font = "bold 72px Noto";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#FFFFFF";
@@ -203,14 +209,6 @@ const generate = async (
     diedPrecision >= 11 &&
     born.startPrecision >= 11;
 
-  const dateFormat = !showDate ? "y" : "y/MM/dd";
-  ctx.fillText(
-    `Died ${!showDate ? "in" : "on"} ${format(diedDate, dateFormat)}`,
-    width / 4,
-    textFieldHeight / 2,
-    topTextWidth
-  );
-
   const bottomTextY = height - textFieldHeight / 2;
   ctx.fillText(
     `Welcome back ${died.name}`,
@@ -219,7 +217,15 @@ const generate = async (
     width - padding * 2
   );
 
-  ctx.font = "bold 55px Arial";
+  ctx.font = "bold 54px Noto";
+
+  const dateFormat = !showDate ? "y" : "y/MM/dd";
+  ctx.fillText(
+    `Died ${!showDate ? "in" : "on"} ${format(diedDate, dateFormat)}`,
+    width / 4,
+    textFieldHeight / 2,
+    topTextWidth
+  );
   ctx.fillText(born.name, (3 * width) / 4, textFieldHeight / 4, topTextWidth);
   ctx.fillText(
     `Born ${!showDate ? "in" : "on"} ${format(bornDate, dateFormat)}`,
