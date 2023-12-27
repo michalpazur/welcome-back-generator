@@ -199,7 +199,7 @@ const generate = async (
   const bornDate = born.startDate as Date;
   const showDate = method === "maxYearAfter" || method === "sameYearAfter";
 
-  const dateFormat = !showDate ? "yyyy" : "yyyy/MM/dd";
+  const dateFormat = !showDate ? "y" : "y/MM/dd";
   ctx.fillText(
     `Died ${!showDate ? "in" : "on"} ${format(diedDate, dateFormat)}`,
     width / 4,
