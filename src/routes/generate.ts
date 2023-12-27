@@ -196,8 +196,12 @@ const generate = async (
   ctx.strokeStyle = "#FFFFFF";
 
   const diedDate = died.endDate as Date;
+  const diedPrecision = died.endPrecision as number;
   const bornDate = born.startDate as Date;
-  const showDate = method === "maxYearAfter" || method === "sameYearAfter";
+  const showDate =
+    (method === "maxYearAfter" || method === "sameYearAfter") &&
+    diedPrecision >= 11 &&
+    born.startPrecision >= 11;
 
   const dateFormat = !showDate ? "y" : "y/MM/dd";
   ctx.fillText(
