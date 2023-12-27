@@ -1,0 +1,62 @@
+diff --git a/node_modules/canvas/index.js b/node_modules/canvas/index.js
+index f605077..ab66f63 100644
+--- a/node_modules/canvas/index.js
++++ b/node_modules/canvas/index.js
+@@ -19,7 +19,7 @@ function createImageData (array, width, height) {
+   return new bindings.ImageData(array, width, height)
+ }
+ 
+-function loadImage (src) {
++function loadImage (src, opts) {
+   return new Promise((resolve, reject) => {
+     const image = new Image()
+ 
+@@ -31,6 +31,7 @@ function loadImage (src) {
+     image.onload = () => { cleanup(); resolve(image) }
+     image.onerror = (err) => { cleanup(); reject(err) }
+ 
++    image.userAgent = opts ? opts.userAgent : undefined
+     image.src = src
+   })
+ }
+diff --git a/node_modules/canvas/lib/image.js b/node_modules/canvas/lib/image.js
+index 4a37849..171944d 100644
+--- a/node_modules/canvas/lib/image.js
++++ b/node_modules/canvas/lib/image.js
+@@ -19,6 +19,15 @@ let get
+ 
+ const { GetSource, SetSource } = bindings
+ 
++Object.defineProperty(Image.prototype, 'userAgent', { 
++  set(val) {
++    setUserAgent(this, val);
++  },
++  get() {
++    return getUserAgent(this);
++  }
++});
++
+ Object.defineProperty(Image.prototype, 'src', {
+   /**
+    * src setter. Valid values:
+@@ -51,7 +60,7 @@ Object.defineProperty(Image.prototype, 'src', {
+ 
+         get.concat({
+           url: val,
+-          headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36' }
++          headers: { 'User-Agent': this.userAgent ? this.userAgent : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36' }
+         }, (err, res, data) => {
+           if (err) return onerror(err)
+ 
+@@ -94,3 +103,11 @@ function setSource (img, src, origSrc) {
+   SetSource.call(img, src)
+   img._originalSource = origSrc
+ }
++
++function getUserAgent (img) {
++  return img._userAgent
++}
++
++function setUserAgent (img, ua) {
++  img._userAgent = ua
++}

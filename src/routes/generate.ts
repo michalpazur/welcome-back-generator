@@ -1,14 +1,15 @@
-import { format } from "date-fns";
-import express, { Request, Response } from "express";
-import { Op } from "sequelize";
-import { Entry } from "../models/entry";
-import { sequelize } from "../util/sequelize";
 import {
   CanvasRenderingContext2D,
   Image,
   createCanvas,
   loadImage,
 } from "canvas";
+import { format } from "date-fns";
+import express, { Request, Response } from "express";
+import { Op } from "sequelize";
+import { Entry } from "../models/entry";
+import { userAgent } from "../util/axios";
+import { sequelize } from "../util/sequelize";
 
 type GenerateResponse = {
   died: string;
@@ -163,11 +164,13 @@ const generate = async (req: Request, res: Response) => {
   );
 
   try {
-    const diedImg = await loadImage(died.imgUrl);
-    const bornImg = await loadImage(born.imgUrl);
+    const diedImg = await loadImage(encodeURI(died.imgUrl), { userAgent });
+    const bornImg = await loadImage(encodeURI(born.imgUrl), { userAgent });
     pasteImage(diedImg, ctx, 0);
     pasteImage(bornImg, ctx, width / 2);
-  } catch (e: any) {}
+  } catch (e: any) {
+    console.log(e);
+  }
 
   canvas.toBuffer(
     (err, buf) => {
