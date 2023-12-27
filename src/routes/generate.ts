@@ -240,6 +240,10 @@ const generate = async (
     deleteAt: new Date(new Date().getTime() + fileTTL),
   });
 
+  if (!fs.existsSync("storage")) {
+    fs.mkdirSync("storage");
+  }
+
   const fileStream = fs.createWriteStream(`storage/${fileName}`, {
     flags: "w",
   });
