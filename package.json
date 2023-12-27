@@ -26,6 +26,7 @@
     "build": "npx tsc",
     "start": "NODE_ENV=production node dist/index.js",
     "postinstall": "npx patch-package",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "deleteFiles": "node dist/deleteFiles.js"
   }
 }

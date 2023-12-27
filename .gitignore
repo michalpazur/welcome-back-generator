@@ -4,3 +4,4 @@ pageviews*.csv
 .env
 db
 dist
+storage/*.png

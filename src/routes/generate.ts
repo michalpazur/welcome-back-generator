@@ -4,14 +4,19 @@ import {
   createCanvas,
   loadImage,
 } from "canvas";
+import crypto from "crypto";
 import { format } from "date-fns";
 import express, { Request, Response } from "express";
+import fs from "fs";
+import path from "path";
 import { Op } from "sequelize";
 import { Entry } from "../models/entry";
+import { File } from "../models/file";
+import { MessageResponse } from "../types";
 import { userAgent } from "../util/axios";
 import { sequelize } from "../util/sequelize";
 
-type GenerateResponse = {
+type GenerateJsonResponse = {
   died: string;
   diedDate: string;
   born: string;
@@ -56,7 +61,10 @@ const findEntries = async () => {
   return { died, born };
 };
 
-const generateJson = async (req: Request, res: Response<GenerateResponse>) => {
+const generateJson = async (
+  req: Request,
+  res: Response<GenerateJsonResponse>
+) => {
   const { died, born } = await findEntries();
 
   res.json({
@@ -123,9 +131,41 @@ const pasteImage = (img: Image, ctx: CanvasRenderingContext2D, x: number) => {
   }
 };
 
-const generate = async (req: Request, res: Response) => {
-  res.setHeader("Content-Type", "image/png");
+const getFileName = (diedId: string, bornId: string) => {
+  const hash = crypto.createHash("sha256").update(`${diedId}:${bornId}`);
+  return hash.digest("base64url") + ".png";
+};
+
+type GenerateResponse = GenerateJsonResponse & {
+  diedUrl: string;
+  bornUrl: string;
+  fileName: string;
+};
+
+const makeResponse = (died: Entry, born: Entry, fileName: string) => ({
+  died: died.name,
+  diedDate: format(died.endDate as Date, "yyy-MM-dd"),
+  diedUrl: `https://en.wikipedia.org/wiki/${died.name.replace(/\s/g, "_")}`,
+  born: born.name,
+  bornDate: format(born.startDate, "yyy-MM-dd"),
+  bornUrl: `https://en.wikipedia.org/wiki/${born.name.replace(/\s/g, "_")}`,
+  fileName,
+});
+
+const fileTTL = 1000 * 60 * 60 * 3; // 3h
+
+const generate = async (
+  req: Request,
+  res: Response<GenerateResponse | MessageResponse>
+) => {
   const { died, born } = await findEntries();
+
+  const fileName = getFileName(died.id, born.id);
+  const file = await File.findOne({ where: { fileName } });
+
+  if (file) {
+    return res.json(makeResponse(died, born, fileName));
+  }
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
@@ -172,17 +212,43 @@ const generate = async (req: Request, res: Response) => {
     console.log(e);
   }
 
-  canvas.toBuffer(
-    (err, buf) => {
-      res.send(buf);
-    },
-    "image/png",
-    { compressionLevel: 7 }
-  );
+  await File.create({
+    diedId: died.id,
+    bornId: born.id,
+    fileName,
+    deleteAt: new Date(new Date().getTime() + fileTTL),
+  });
+
+  const fileStream = fs.createWriteStream(`storage/${fileName}`, {
+    flags: "w",
+  });
+  const canvasStream = canvas.createPNGStream({ compressionLevel: 8 });
+  canvasStream.pipe(fileStream);
+
+  fileStream.on("close", () => {
+    if (!res.headersSent) {
+      res.json(makeResponse(died, born, fileName));
+    }
+  });
+
+  fileStream.on("error", (e) => {
+    res.json({ message: e.message });
+  });
+};
+
+const getFile = (req: Request<{ fileName: string }>, res: Response) => {
+  const { fileName } = req.params;
+  const fileExists = fs.existsSync(path.join("storage", fileName));
+  if (fileExists) {
+    res.sendFile(fileName, { root: "storage" });
+  } else {
+    res.sendStatus(404);
+  }
 };
 
 const router = express.Router();
 router.get("/json", generateJson);
 router.get("/", generate);
+router.get("/image/:fileName", getFile);
 
 export { router as generateRouter };
