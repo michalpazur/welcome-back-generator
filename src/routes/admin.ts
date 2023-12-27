@@ -146,7 +146,7 @@ const getWikidataForObject = async (
 
   const wikidata = await getWikidataDetails(id);
   const newEntry: Partial<EntryAttributes> = { id, name: response.title };
-  const imageKey = imageKeys.find((k) => !!wikidata[k]);
+  const imageKey = Object.keys(wikidata).find((k) => imageKeys.includes(k));
   if (!imageKey) return undefined;
   const image = wikidata[imageKey][0].value;
   if (!image || !image.content) return undefined;
@@ -165,7 +165,7 @@ const getWikidataForObject = async (
       "https://upload.wikimedia.org/wikipedia/commons/thumb/" + url;
   }
 
-  const startDateKey = startDateKeys.find((k) => !!wikidata[k]);
+  const startDateKey = Object.keys(wikidata).find((k) => startDateKeys.includes(k));
   if (!startDateKey) return undefined;
   const startDate = wikidata[startDateKey][0].value.content as WikidataDate;
   if (!startDate?.time) return undefined;
@@ -174,7 +174,7 @@ const getWikidataForObject = async (
   newEntry.startDate = date;
   newEntry.startPrecision = startDate.precision;
 
-  const endDateKey = endDateKeys.find((k) => !!wikidata[k]);
+  const endDateKey = Object.keys(wikidata).find((k) => endDateKeys.includes(k));
   if (endDateKey) {
     const endDate = wikidata[endDateKey][0].value.content as WikidataDate;
     if (!endDate?.time) return undefined;
