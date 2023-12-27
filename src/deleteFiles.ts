@@ -8,6 +8,7 @@ const main = async () => {
         [Op.lte]: new Date(),
       },
     },
+    individualHooks: true,
   });
 
   return filesToDelete;

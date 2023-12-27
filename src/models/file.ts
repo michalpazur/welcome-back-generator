@@ -8,6 +8,9 @@ import {
 } from "sequelize";
 import { sequelize } from "../util/sequelize";
 import { Entry } from "./entry";
+import fs from "fs";
+import { rm as removeFile } from "fs/promises";
+import path from "path";
 
 interface FileAttributes {
   fileName: string;
@@ -49,6 +52,14 @@ File.init(
   },
   {
     sequelize,
+    hooks: {
+      beforeDestroy: async (instance) => {
+        const filePath = path.join("storage", instance.fileName);
+        if (fs.existsSync(filePath)) {
+          await removeFile(filePath);
+        }
+      },
+    },
   }
 );
 
