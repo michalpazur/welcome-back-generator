@@ -1,0 +1,3 @@
+# REMEMBER TO USE LF LINE ENDINGS!
+0,30 * * * * cd /app && /usr/local/bin/node dist/deleteFiles.js >> /app/deleteFiles.log 2>&1
+0 0 * * * rm -f /app/deleteFiles.log

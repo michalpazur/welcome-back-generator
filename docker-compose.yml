@@ -1,11 +1,17 @@
 version: "3.9"
 services:
-  express: 
-    build:
-      context: .
-      dockerfile: Dockerfile
+  express:
+    build: .
     ports:
       - "3000:${PORT}"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+  cron:
+    build: .
+    command: ["cron", "-f"]
     env_file:
       - .env
     depends_on:
