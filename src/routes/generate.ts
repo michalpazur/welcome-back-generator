@@ -5,25 +5,21 @@ import {
   loadImage,
 } from "canvas";
 import crypto from "crypto";
-import { format } from "date-fns";
+import { add, format } from "date-fns";
 import express, { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-import { Op } from "sequelize";
-import { Entry } from "../models/entry";
+import { Op, WhereOptions } from "sequelize";
+import { Entry, EntryAttributes } from "../models/entry";
 import { File } from "../models/file";
-import { MessageResponse } from "../types";
+import { E, MessageResponse } from "../types";
 import { userAgent } from "../util/axios";
 import { sequelize } from "../util/sequelize";
 
-type GenerateJsonResponse = {
-  died: string;
-  diedDate: string;
-  born: string;
-  bornDate: string;
-};
+type DateQuery = "sameYear" | "sameYearAfter" | "after" | "maxYearAfter";
+type GenerateQuery = { method: DateQuery };
 
-const findEntries = async () => {
+const findEntries = async (query: DateQuery = "sameYear") => {
   let died: Entry | null = null;
   let born: Entry | null = null;
 
@@ -38,15 +34,28 @@ const findEntries = async () => {
   while (!born) {
     let randomIndex = Math.floor(Math.random() * allDead.length);
     died = allDead[randomIndex] as Entry;
-    const year = died.endDate?.getFullYear();
+    const diedDate = died.endDate as Date;
+
+    const sameYearFilter = sequelize.where(
+      sequelize.fn("date_part", "Year", sequelize.col("startDate")),
+      diedDate.getFullYear()
+    );
+    const dateGreaterFilter = { startDate: { [Op.gte]: diedDate } };
+
+    const dateFilter: { [k in DateQuery]: WhereOptions<EntryAttributes> } = {
+      sameYear: sameYearFilter,
+      sameYearAfter: [sameYearFilter, dateGreaterFilter],
+      after: dateGreaterFilter,
+      maxYearAfter: [
+        dateGreaterFilter,
+        { startDate: { [Op.lte]: add(diedDate, { years: 1 }) } },
+      ],
+    };
 
     const allBorn = await Entry.findAll({
       where: {
         [Op.and]: [
-          sequelize.where(
-            sequelize.fn("date_part", "Year", sequelize.col("startDate")),
-            year
-          ),
+          dateFilter[query] || dateFilter.sameYear,
           { id: { [Op.ne]: died.id } },
         ],
       },
@@ -61,11 +70,19 @@ const findEntries = async () => {
   return { died, born };
 };
 
+type GenerateJsonResponse = {
+  died: string;
+  diedDate: string;
+  born: string;
+  bornDate: string;
+};
+
 const generateJson = async (
-  req: Request,
+  req: Request<E, E, E, GenerateQuery>,
   res: Response<GenerateJsonResponse>
 ) => {
-  const { died, born } = await findEntries();
+  const { method } = req.query;
+  const { died, born } = await findEntries(method);
 
   res.json({
     died: died.name,
@@ -155,10 +172,11 @@ const makeResponse = (died: Entry, born: Entry, fileName: string) => ({
 const fileTTL = 1000 * 60 * 60 * 3; // 3h
 
 const generate = async (
-  req: Request,
+  req: Request<E, E, E, GenerateQuery>,
   res: Response<GenerateResponse | MessageResponse>
 ) => {
-  const { died, born } = await findEntries();
+  const { method } = req.query;
+  const { died, born } = await findEntries(method);
 
   const fileName = getFileName(died.id, born.id);
   const file = await File.findOne({ where: { fileName } });
@@ -177,10 +195,13 @@ const generate = async (
   ctx.fillStyle = "#FFFFFF";
   ctx.strokeStyle = "#FFFFFF";
 
-  const endYear = died.endDate?.getFullYear() as number;
+  const diedDate = died.endDate as Date;
+  const bornDate = born.startDate as Date;
+  const showDate = method === "maxYearAfter" || method === "sameYearAfter";
 
+  const dateFormat = !showDate ? "yyyy" : "yyyy/MM/dd";
   ctx.fillText(
-    `Died in ${endYear}`,
+    `Died ${!showDate ? "in" : "on"} ${format(diedDate, dateFormat)}`,
     width / 4,
     textFieldHeight / 2,
     topTextWidth
@@ -197,7 +218,7 @@ const generate = async (
   ctx.font = "bold 55px Arial";
   ctx.fillText(born.name, (3 * width) / 4, textFieldHeight / 4, topTextWidth);
   ctx.fillText(
-    `Born in ${born.startDate.getFullYear()}`,
+    `Born ${!showDate ? "in" : "on"} ${format(bornDate, dateFormat)}`,
     (3 * width) / 4,
     (3 * textFieldHeight) / 4,
     topTextWidth
@@ -209,7 +230,7 @@ const generate = async (
     pasteImage(diedImg, ctx, 0);
     pasteImage(bornImg, ctx, width / 2);
   } catch (e: any) {
-    console.log(e);
+    return res.json({ message: e });
   }
 
   await File.create({
