@@ -17,8 +17,8 @@ import { E, MessageResponse } from "../types";
 import { userAgent } from "../util/axios";
 import { sequelize } from "../util/sequelize";
 
-registerFont(path.join("src", "assets", "font", "NotoSans.ttf"), {
-  family: "Noto",
+registerFont(path.join("src", "assets", "font", "WorkSans-Bold.ttf"), {
+  family: "Work Sans",
   weight: "bold",
 });
 
@@ -195,7 +195,7 @@ const generate = async (
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "#757575";
   ctx.fillRect(0, 0, width, height);
-  ctx.font = "bold 72px Noto";
+  ctx.font = "bold 72px 'Work Sans'";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#FFFFFF";
@@ -217,7 +217,7 @@ const generate = async (
     width - padding * 2
   );
 
-  ctx.font = "bold 54px Noto";
+  ctx.font = "bold 54px 'Work Sans'";
 
   const dateFormat = !showDate ? "y" : "y/MM/dd";
   ctx.fillText(
