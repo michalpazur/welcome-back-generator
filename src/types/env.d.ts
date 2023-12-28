@@ -9,6 +9,9 @@ declare global {
       POSTGRES_PASSWORD: string;
       POSTGRES_DB: string;
       USER_AGENT_EMAIL: string;
+      ADMIN_LOGIN: string;
+      ADMIN_PASSWORD: string;
+      TRUSTED_PROXIES: string;
     }
   }
 }
