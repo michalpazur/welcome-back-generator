@@ -1,28 +1,41 @@
-import { Typography, TypographyVariant } from "@mui/material";
+import { Link, Stack, Typography } from "@mui/material";
 import React from "react";
-const hello = import.meta.env.VITE_HELLO_WORLD;
-
-const variants: TypographyVariant[] = [
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "body1",
-];
+import Wrapper from "../../components/Wrapper";
 
 const Main: React.FC = () => {
   return (
-    <React.Fragment>
-      <Typography variant="h1">{hello}</Typography>
-      {variants.map((v) => (
-        <Typography variant={v} key={v}>
-          Hello {v}!
-        </Typography>
-      ))}
-    </React.Fragment>
+    <Stack spacing={3}>
+      <Typography variant="h1">Welcome back!</Typography>
+      <Typography>
+        Generate a "Welcome back" meme based on random Wikipedia articles.
+      </Typography>
+      <Typography variant="h2">Generate</Typography>
+      <Typography>
+        This generator has been made possible by{" "}
+        <Link href="https://en.wikipedia.org" target="_blank">
+          Wikipedia
+        </Link>{" "}
+        and{" "}
+        <Link href="https://wikidata.org" target="_blank">
+          Wikidata
+        </Link>{" "}
+        contributors under{" "}
+        <Link
+          href="https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License"
+          target="_blank"
+        >
+          CC BY-SA 4.0
+        </Link>{" "}
+        license.
+      </Typography>
+    </Stack>
   );
 };
 
-export default Main;
+const Wrapped: React.FC = () => (
+  <Wrapper>
+    <Main />
+  </Wrapper>
+);
+
+export default Wrapped;

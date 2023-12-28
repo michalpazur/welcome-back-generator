@@ -1,11 +1,22 @@
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 
+declare module "@mui/material/styles" {
+  interface BreakpointOverrides {
+    xxs: true;
+  }
+  type Breakpoint = "xxs" | "xs" | "sm" | "md" | "lg" | "xl";
+}
+
 let theme = createTheme({
   spacing: 4,
+  shape: {
+    borderRadius: 6,
+  },
   breakpoints: {
     values: {
-      xs: 0,
-      sm: 600,
+      xxs: 0,
+      xs: 475,
+      sm: 768,
       md: 1024,
       lg: 1280,
       xl: 1440,
@@ -50,16 +61,7 @@ let theme = createTheme({
       lineHeight: 28 / 18,
     },
     body1: {
-      lineHeight: 26 / 16,
-    }
-  },
-  components: {
-    MuiTypography: {
-      styleOverrides: {
-        root: {
-          lineHeight: "calc(1em + 10px)",
-        },
-      },
+      lineHeight: 22 / 16,
     },
   },
 });
