@@ -8,6 +8,9 @@ RUN apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev
 COPY cron/crontab /etc/cron.d/delete-cron
 RUN crontab /etc/cron.d/delete-cron
 
+RUN touch express.log
+RUN chmod 666 express.log
+
 RUN yarn install
 RUN yarn build
 CMD [ "npm", "start" ]

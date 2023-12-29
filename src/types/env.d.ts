@@ -12,6 +12,7 @@ declare global {
       ADMIN_LOGIN: string;
       ADMIN_PASSWORD: string;
       TRUSTED_PROXIES: string;
+      LOG_LEVEL: "debug" | "info" | "warn" | "error"
     }
   }
 }

@@ -5,3 +5,4 @@ pageviews*.csv
 db
 dist
 storage/*.png
+express.log
