@@ -3,6 +3,7 @@ import React from "react";
 import Main from "./screens/Main";
 import { theme } from "./theme";
 import Footer from "./components/Footer";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 const PageRoot = styled(Box)({
   display: "flex",
@@ -22,16 +23,20 @@ const Root = styled(Box)(({ theme }) => ({
   },
 }));
 
+const client = new QueryClient();
+
 const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <PageRoot>
-        <Root>
-          <Main />
-        </Root>
-        <Footer />
-      </PageRoot>
+      <QueryClientProvider client={client}>
+        <PageRoot>
+          <Root>
+            <Main />
+          </Root>
+          <Footer />
+        </PageRoot>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 };

@@ -1,6 +1,7 @@
 import { Link, Stack, Typography } from "@mui/material";
 import React from "react";
 import Wrapper from "../../components/Wrapper";
+import Generator from "./components/Generator";
 
 const Main: React.FC = () => {
   return (
@@ -10,6 +11,7 @@ const Main: React.FC = () => {
         Generate a "Welcome back" meme based on random Wikipedia articles.
       </Typography>
       <Typography variant="h2">Generate</Typography>
+      <Generator />
       <Typography>
         This generator has been made possible by{" "}
         <Link href="https://en.wikipedia.org" target="_blank">

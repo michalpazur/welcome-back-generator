@@ -26,6 +26,9 @@ let theme = createTheme({
     primary: {
       main: "#0072E5",
     },
+    secondary: {
+      main: "#D6DCE9",
+    },
     text: {
       primary: "#170225",
     },
@@ -62,6 +65,39 @@ let theme = createTheme({
     },
     body1: {
       lineHeight: 22 / 16,
+    },
+  },
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& ::placeholder": {
+            color: theme.palette.secondary.dark + " !important",
+          },
+        }),
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        icon: ({ theme }) => ({
+          color: theme.palette.secondary.dark,
+          ".Mui-disabled &": {
+            color: theme.palette.text.disabled,
+          },
+          transition: theme.transitions.create("transform", {
+            duration: theme.transitions.duration.shorter,
+          }),
+        }),
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
+          marginTop: theme.spacing(2),
+          border: "2px solid",
+          borderColor: theme.palette.primary.main,
+        }),
+      },
     },
   },
 });
