@@ -15,4 +15,4 @@ const getFile = (req: Request<{ fileName: string }>, res: Response) => {
 const router = express.Router();
 router.get("/:fileName", getFile);
 
-export { router as iamgeRouter };
+export { router as imageRouter };
