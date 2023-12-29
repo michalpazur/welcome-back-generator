@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Collapse,
   Fade,
+  Grid,
   Link,
   MenuItem,
   Stack,
@@ -16,7 +17,7 @@ import {
   styled,
 } from "@mui/material";
 import { AxiosError, isAxiosError } from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import TextField from "../../../components/TextField";
 import { methods } from "../../../data/methods";
 import { useIsMobile } from "../../../util/useIsMobile";
@@ -27,7 +28,7 @@ import {
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
-const imgContainerSx: SxProps<Theme> = {
+const imgContainerSx: SxProps<Theme> = (theme) => ({
   position: "relative",
   width: "100%",
   aspectRatio: "6 / 5",
@@ -35,7 +36,10 @@ const imgContainerSx: SxProps<Theme> = {
   backgroundColor: (theme) => theme.palette.secondary.main,
   borderRadius: "6px",
   overflow: "hidden",
-};
+  [theme.breakpoints.up("lg")]: {
+    width: "600px",
+  },
+});
 
 const imgSx: SxProps = {
   width: "100%",
@@ -55,8 +59,17 @@ const bold = { fontWeight: "bold" };
 
 const Image = styled("img")();
 
+const WrappedGrid: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Box>
+    <Grid spacing={3} container>
+      {children}
+    </Grid>
+  </Box>
+);
+
 const Generator: React.FC = () => {
-  const isMobile = useIsMobile();
+  const upLg = !useIsMobile("lg");
+  const isMobile = useIsMobile("sm");
   const [value, setValue] = useState("sameYearAfter");
   const [data, setData] = useState<GenerateResponse | undefined>();
   const [imageError, setImageError] = useState(false);
@@ -104,34 +117,8 @@ const Generator: React.FC = () => {
     setImageError(true);
   };
 
-  return (
-    <React.Fragment>
-      <Stack
-        direction={isMobile ? "column" : "row"}
-        spacing={3}
-        alignItems={isMobile ? "flex-start" : "center"}
-      >
-        <TextField
-          select
-          sx={{ flexGrow: "1", maxWidth: "300px" }}
-          label="Choose generation method"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        >
-          {methods.map((m) => (
-            <MenuItem key={m.key} value={m.key}>
-              {m.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Button
-          variant="contained"
-          disabled={isPending || timeLeft >= 0}
-          onClick={onGenerateClick}
-        >
-          Let's go
-        </Button>
-      </Stack>
+  const rateLimitError = useMemo(
+    () => (
       <Collapse in={timeLeft > 0}>
         <Alert severity="error">
           <AlertTitle>Too many requests!</AlertTitle>
@@ -139,6 +126,12 @@ const Generator: React.FC = () => {
           {timeLeft !== 1 ? "s" : ""}.
         </Alert>
       </Collapse>
+    ),
+    [timeLeft]
+  );
+
+  const imageContainer = useMemo(
+    () => (
       <Box sx={imgContainerSx}>
         {data && !imageError && (
           <Image
@@ -158,7 +151,13 @@ const Generator: React.FC = () => {
           </Box>
         </Fade>
       </Box>
-      {data && (
+    ),
+    [data, isPending, imageError]
+  );
+
+  const infoBox = useMemo(
+    () =>
+      data && (
         <Collapse in appear>
           <Typography>
             <span style={bold}>Died:</span>{" "}
@@ -173,7 +172,62 @@ const Generator: React.FC = () => {
             </Link>
           </Typography>
         </Collapse>
-      )}
+      ),
+    [data]
+  );
+
+  return (
+    <React.Fragment>
+      <WrappedGrid>
+        <Grid item xxs={12} lg>
+          <Stack
+            direction={isMobile || upLg ? "column" : "row"}
+            spacing={3}
+            alignItems={isMobile || upLg ? "flex-start" : "center"}
+          >
+            <TextField
+              select
+              sx={{ width: "100%" }}
+              label="Choose generation method"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            >
+              {methods.map((m) => (
+                <MenuItem key={m.key} value={m.key}>
+                  {m.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Button
+              variant="contained"
+              disabled={isPending || timeLeft >= 0}
+              onClick={onGenerateClick}
+              sx={{ width: "100%" }}
+            >
+              Let's go
+            </Button>
+            {upLg && infoBox}
+          </Stack>
+        </Grid>
+        {!upLg ? (
+          <React.Fragment>
+            <Grid item xxs={12}>
+              {rateLimitError}
+            </Grid>
+            <Grid item xxs={12} display="flex" justifyContent="center">
+              {imageContainer}
+            </Grid>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <Grid item>{imageContainer}</Grid>
+            <Grid item lg={12}>
+              {rateLimitError}
+            </Grid>
+          </React.Fragment>
+        )}
+      </WrappedGrid>
+      {!upLg && infoBox}
     </React.Fragment>
   );
 };
