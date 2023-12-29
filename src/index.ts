@@ -1,16 +1,22 @@
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { adminRouter } from "./routes/admin";
 import { generateRouter } from "./routes/generate";
 import { imageRouter } from "./routes/image";
+import { errorLogger, expressLogger } from "./util/logger";
 import { rateLimiter } from "./util/rateLimiter";
 import { sequelize } from "./util/sequelize";
-import { errorLogger, expressLogger, logger } from "./util/logger";
 
 const app = express();
 dotenv.config();
 
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGIN,
+  })
+);
 app.set("trust proxy", Number.parseInt(process.env.TRUSTED_PROXIES || "1"));
 
 app.use(expressLogger);
