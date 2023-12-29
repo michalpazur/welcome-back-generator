@@ -16,7 +16,7 @@ jobs:
           yarn install
           yarn build
         env:
-          VITE_HELLO_WORLD: ${{ secrets.VITE_HELLO_WORLD }}
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
